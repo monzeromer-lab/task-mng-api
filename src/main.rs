@@ -1,6 +1,6 @@
-// application starting point
-
 mod infrastructure;
+mod domain;
+mod interfaces;
 
 use actix_web::web::Data;
 use actix_web::{web, App, HttpServer, Responder};
