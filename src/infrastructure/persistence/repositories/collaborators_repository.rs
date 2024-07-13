@@ -1,7 +1,7 @@
-use sea_orm::DatabaseConnection;
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use async_trait::async_trait;
 use sea_orm::DbErr;
-use crate::domain::collaboration::repository::Collaboration;
+use crate::domain::collaboration::model::{ Entity as CollaborationEntity, Model as Collaboration, Column, ActiveModel};
 use crate::domain::collaboration::repository::CollaborationRepository;
 
 pub struct CollaborationRepo {
@@ -16,19 +16,32 @@ impl CollaborationRepo {
 
 #[async_trait]
 impl CollaborationRepository for CollaborationRepo {
-    fn find_task_collaborators(&self, task_id: i32) -> Result<Vec<Collaboration>, DbErr> {
-        todo!()
+    async fn find_task_collaborators(&self, task_id: i32) -> Result<Vec<Collaboration>, DbErr> {
+        CollaborationEntity::find()
+            .filter(Column::TaskId.eq(task_id))
+            .all(&self.db)
+            .await
     }
 
-    fn find_user_collaborations(&self, user_id: i32) -> Result<Vec<Collaboration>, DbErr> {
-        todo!()
+    async fn find_user_collaborations(&self, user_id: i32) -> Result<Vec<Collaboration>, DbErr> {
+        CollaborationEntity::find()
+            .filter(Column::UserId.eq(user_id))
+            .all(&self.db)
+            .await
     }
 
-    fn add(&self, collaboration: crate::domain::collaboration::repository::NewCollaboration) -> Result<Collaboration, DbErr> {
-        todo!()
+    async fn add(&self, collaboration: Collaboration) -> Result<Collaboration, DbErr> {
+        let collaborator = ActiveModel {
+            user_id: Set(collaboration.user_id),
+            task_id: Set(collaboration.task_id),
+            ..Default::default()
+        };
+        // Lol
+        let collabotator_record = CollaborationEntity::insert(collaborator).exec(&self.db).await?.last_insert_id;
+        CollaborationEntity::find_by_id(collabotator_record).one(&self.db).await?.ok_or(DbErr::RecordNotFound("Couldn't find the collaborator".to_string()))
     }
 
-    fn remove(&self, collaboration_id: i32) -> Result<bool, DbErr> {
+    async fn remove(&self, collaboration_id: i32) -> Result<bool, DbErr> {
         todo!()
     }
 }
