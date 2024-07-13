@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sea_orm::DbErr;
 use super::model::{TaskState, Model as Task};
@@ -9,7 +8,6 @@ pub struct TasksFilter {
     pub status: TaskState,
 }
 
-#[async_trait]
 pub trait TaskRepository {
     async fn due_date_datetime(&self) -> DateTime<Utc>;
     async fn find_task(&self, task_id: i32) -> Result<Task, DbErr>;

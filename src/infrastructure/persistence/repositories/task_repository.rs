@@ -2,7 +2,6 @@ use crate::domain::task::model::{
     ActiveModel, Column as TaskColumn, Entity as TaskEntity, Model as Task
 };
 use crate::domain::task::repository::{TaskRepository, TasksFilter};
-use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sea_orm::{ColumnTrait, DatabaseConnection, DbErr, EntityTrait,JoinType, PaginatorTrait, QueryFilter, QuerySelect, RelationTrait, Set
 };
@@ -17,7 +16,6 @@ impl TaskRepo {
     }
 }
 
-#[async_trait]
 impl TaskRepository for TaskRepo {
     async fn due_date_datetime(&self) -> DateTime<Utc> {
         Utc::now()

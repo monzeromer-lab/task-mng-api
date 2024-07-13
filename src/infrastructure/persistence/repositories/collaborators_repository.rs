@@ -1,5 +1,4 @@
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
-use async_trait::async_trait;
 use sea_orm::DbErr;
 use crate::domain::collaboration::model::{ Entity as CollaborationEntity, Model as Collaboration, Column, ActiveModel};
 use crate::domain::collaboration::repository::CollaborationRepository;
@@ -14,7 +13,6 @@ impl CollaborationRepo {
     }
 }
 
-#[async_trait]
 impl CollaborationRepository for CollaborationRepo {
     async fn find_task_collaborators(&self, task_id: i32) -> Result<Vec<Collaboration>, DbErr> {
         CollaborationEntity::find()
@@ -42,6 +40,14 @@ impl CollaborationRepository for CollaborationRepo {
     }
 
     async fn remove(&self, collaboration_id: i32) -> Result<bool, DbErr> {
-        todo!()
+        let record = ActiveModel {
+            id: Set(collaboration_id),
+            ..Default::default()
+        };
+        let deleted = CollaborationEntity::delete(record)
+            .exec(&self.db)
+            .await?;
+        
+        Ok(deleted.rows_affected > 0)
     }
 }

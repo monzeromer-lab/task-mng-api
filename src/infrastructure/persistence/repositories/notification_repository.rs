@@ -1,5 +1,4 @@
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, PaginatorTrait, QueryFilter, Set};
-use async_trait::async_trait;
 use crate::domain::notification::model::{Entity as NotificationEntity, Model as Notification, Column, ActiveModel};
 use crate::domain::notification::repository::NotificationRepository;
 
@@ -13,7 +12,6 @@ impl NotificationRepo {
     }
 }
 
-#[async_trait]
 impl NotificationRepository for NotificationRepo {
     async fn find_notifications(&self, user_id: i32, page_number: u8) -> Result<Vec<crate::domain::notification::model::Model>, sea_orm::DbErr> {
         NotificationEntity::find()
