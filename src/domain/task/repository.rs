@@ -19,4 +19,3 @@ pub trait TaskRepository {
     async fn update(&self, task_id: i32, task: Task) -> Result<Task, DbErr>;
     async fn delete(&self, task_id: i32) -> Result<bool, DbErr>;
 }
-

@@ -10,6 +10,7 @@ pub struct Model {
     pub user_id: Option<i32>,
     pub task_id: Option<i32>,
     pub message: String,
+    #[sea_orm(default_value = false)]
     pub read: bool,
     pub created_at: Option<DateTime>,
 }

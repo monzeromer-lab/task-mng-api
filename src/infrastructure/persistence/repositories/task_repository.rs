@@ -29,12 +29,10 @@ impl TaskRepository for TaskRepo {
     }
 
     async fn find(&self, limit: Option<u8>) -> Result<Vec<Task>, DbErr> {
-        let query = TaskEntity::find()
+        TaskEntity::find()
             .limit(limit.unwrap_or(10) as u64)
             .all(&self.db)
-            .await?;
-
-        Ok(query)
+            .await
     }
 
     async fn filter_tasks(
