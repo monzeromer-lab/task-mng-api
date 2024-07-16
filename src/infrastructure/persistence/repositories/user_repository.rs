@@ -1,13 +1,14 @@
-use sea_orm::{ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, Set};
 use crate::domain::user::model::{ Entity as UserEntity, Model as User, Column, ActiveModel};
 use crate::domain::user::repository::UserRepository;
 
+#[derive(Debug, Default, Clone)]
 pub struct UserRepo {
-    db: DatabaseConnection
+    pub db: DatabaseConnection
 }
 
 impl UserRepo {
-    fn _new(db: DatabaseConnection) -> Self {
+    pub fn new(db: DatabaseConnection) -> Self {
         Self { db }
     }
 }
@@ -39,11 +40,19 @@ impl UserRepository for UserRepo {
             .await?.ok_or(DbErr::RecordNotFound("Couldn't find User with username: {username}".to_string()))
     }
 
-    async fn update_password(&self, new_password: String, verify_code: String) -> Result<bool, sea_orm::DbErr> {
-        todo!()
+    async fn update_password(&self, new_password: String, verify_code: String) -> Result<User, sea_orm::DbErr> {
+        let user_record = UserEntity::find_by_id(23).one(&self.db).await?;
+        let mut user: ActiveModel = user_record.ok_or(DbErr::RecordNotFound("User not found!".to_string()))?.into();
+        user.password_hash = Set(new_password);
+        
+        user.update(&self.db).await
     }
 
     async fn active_user(&self, user_id: i32, verify_code: String) -> Result<bool, sea_orm::DbErr> {
-        todo!()
+        let user_record = UserEntity::find_by_id(user_id).one(&self.db).await?;
+        let mut user: ActiveModel = user_record.ok_or(DbErr::RecordNotFound("User not found!".to_string()))?.into();
+        user.active = Set(true);
+        
+        Ok(user.update(&self.db).await?.active)
     }
 }

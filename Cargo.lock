@@ -2408,7 +2408,6 @@ name = "task-mng-api"
 version = "0.1.0"
 dependencies = [
  "actix-web",
- "async-trait",
  "chrono",
  "sea-orm",
  "tracing",

@@ -4,6 +4,7 @@ mod interfaces;
 
 use actix_web::web::Data;
 use actix_web::{web, App, HttpServer, Responder};
+use domain::user::service::demo;
 use infrastructure::database::init_db;
 use sea_orm::DatabaseConnection;
 use tracing::level_filters::LevelFilter;
@@ -35,6 +36,8 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     let database_connection = init_db().await;
+    
+    demo().await;
 
     HttpServer::new(move || {
         App::new()

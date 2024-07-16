@@ -10,7 +10,6 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.8.0"
-async-trait = "0.1.81"
 chrono = "0.4.38"
 sea-orm = {version="0.12.15", features=["sqlx-sqlite", "runtime-tokio-native-tls", "macros", "with-uuid", "with-time", "with-chrono", "with-json"]}
 tracing = { version = "0.1.40", features = ["attributes"] }
