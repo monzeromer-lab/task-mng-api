@@ -1,11 +1,15 @@
 mod infrastructure;
 mod domain;
 mod interfaces;
+mod constns;
 
+use std::sync::Arc;
 use actix_web::web::Data;
 use actix_web::{web, App, HttpServer, Responder};
-use domain::user::service::demo;
+use constns::cache::CACHE_VALUES;
+use infrastructure::cache::create_cache_store;
 use infrastructure::database::init_db;
+use moka::future::Cache;
 use sea_orm::DatabaseConnection;
 use tracing::level_filters::LevelFilter;
 use tracing::{event, instrument, Level};
@@ -21,7 +25,8 @@ async fn index() -> impl Responder {
 }
 
 pub struct AppState {
-    pub connection: DatabaseConnection
+    pub connection: DatabaseConnection,
+    pub app_cache: Arc<Cache<String, CACHE_VALUES>>
 }
 
 #[actix_web::main]
@@ -36,17 +41,17 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     let database_connection = init_db().await;
-    
-    demo().await;
+    let app_cache = Arc::new(create_cache_store(10000));
 
     HttpServer::new(move || {
         App::new()
         .app_data(Data::new(AppState {
-            connection: database_connection.clone()
+            connection: database_connection.clone(),
+            app_cache: app_cache.clone()
         }))
-        .service(web::scope("/app").route("/index.html", web::get().to(index)))
+        .service(web::scope("/app").route("/health", web::get().to(index)))
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", 8000))?
     .run()
     .await
 }

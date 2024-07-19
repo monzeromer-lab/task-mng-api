@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use sea_orm::DbErr;
 use super::model::{TaskState, Model as Task};
 
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TasksFilter {
     pub title: String,
     pub due_date: Option<DateTime<Utc>>,

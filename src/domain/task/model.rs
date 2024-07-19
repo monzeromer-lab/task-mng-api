@@ -2,7 +2,7 @@
 
 use sea_orm::entity::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Hash)]
 #[sea_orm(rs_type = "String", db_type = "String(Some(1))")]
 pub enum TaskState {
     #[sea_orm(string_value = "pending")]
@@ -13,7 +13,7 @@ pub enum TaskState {
     Completed,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Hash)]
 #[sea_orm(table_name = "tasks")]
 pub struct Model {
     #[sea_orm(primary_key)]
