@@ -1,9 +1,9 @@
 use crate::domain::task::repository::TasksFilter;
 // use std::default;
-use crate::domain::user::model::{Model as User};
-use crate::domain::task::model::{Model as Task};
-use crate::domain::collaboration::model::{Model as Collaboration};
-use crate::domain::notification::model::{Model as Notification};
+use crate::domain::collaboration::model::Model as Collaboration;
+use crate::domain::notification::model::Model as Notification;
+use crate::domain::task::model::Model as Task;
+use crate::domain::user::model::Model as User;
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum CACHE_VALUES {
@@ -18,4 +18,5 @@ pub enum CACHE_VALUES {
     NOTIFICATION(Notification),
     NOTIFICATION_FOR_USER(i32),
     VERIFICATION_CODE(String, i32),
+    ACTIVATION_CODE(String, i32),
 }

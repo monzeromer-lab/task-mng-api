@@ -1,10 +1,12 @@
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
-use sea_orm::DbErr;
-use crate::domain::collaboration::model::{ Entity as CollaborationEntity, Model as Collaboration, Column, ActiveModel};
+use crate::domain::collaboration::model::{
+    ActiveModel, Column, Entity as CollaborationEntity, Model as Collaboration,
+};
 use crate::domain::collaboration::repository::CollaborationRepository;
+use sea_orm::DbErr;
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 
 pub struct CollaborationRepo {
-    db: DatabaseConnection
+    db: DatabaseConnection,
 }
 
 impl CollaborationRepo {
@@ -35,8 +37,16 @@ impl CollaborationRepository for CollaborationRepo {
             ..Default::default()
         };
         // Lol
-        let collabotator_record = CollaborationEntity::insert(collaborator).exec(&self.db).await?.last_insert_id;
-        CollaborationEntity::find_by_id(collabotator_record).one(&self.db).await?.ok_or(DbErr::RecordNotFound("Couldn't find the collaborator".to_string()))
+        let collabotator_record = CollaborationEntity::insert(collaborator)
+            .exec(&self.db)
+            .await?
+            .last_insert_id;
+        CollaborationEntity::find_by_id(collabotator_record)
+            .one(&self.db)
+            .await?
+            .ok_or(DbErr::RecordNotFound(
+                "Couldn't find the collaborator".to_string(),
+            ))
     }
 
     async fn remove(&self, collaboration_id: i32) -> Result<bool, DbErr> {
@@ -44,10 +54,8 @@ impl CollaborationRepository for CollaborationRepo {
             id: Set(collaboration_id),
             ..Default::default()
         };
-        let deleted = CollaborationEntity::delete(record)
-            .exec(&self.db)
-            .await?;
-        
+        let deleted = CollaborationEntity::delete(record).exec(&self.db).await?;
+
         Ok(deleted.rows_affected > 0)
     }
 }
