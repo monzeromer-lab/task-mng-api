@@ -1,5 +1,5 @@
-use sea_orm::DatabaseConnection;
 use crate::infrastructure::persistence::repositories::task_repository::TaskRepo;
+use sea_orm::DatabaseConnection;
 
 use super::repository::TaskRepository;
 
@@ -11,20 +11,18 @@ pub struct TaskService<'a> {
 
 impl<'a> TaskService<'a> {
     pub fn _new(&self, db: &'a DatabaseConnection) -> Self {
-        let repository = TaskRepo {
-            db: db
-        };
-        Self { 
-            repository,
-            db 
-        }
+        let repository = TaskRepo { db: db };
+        Self { repository, db }
     }
 
     pub async fn find_task(&self, task_id: i32) -> Result<super::model::Model, sea_orm::DbErr> {
         self.repository.find_task(task_id).await
     }
 
-    pub async fn find(&self, limit: Option<u8>) -> Result<Vec<super::model::Model>, sea_orm::DbErr> {
+    pub async fn find(
+        &self,
+        limit: Option<u8>,
+    ) -> Result<Vec<super::model::Model>, sea_orm::DbErr> {
         self.repository.find(limit).await
     }
 
@@ -34,7 +32,9 @@ impl<'a> TaskService<'a> {
         filter: super::repository::TasksFilter,
         page_number: u8,
     ) -> Result<Vec<super::model::Model>, sea_orm::DbErr> {
-        self.repository.filter_tasks(user_id, filter, page_number).await
+        self.repository
+            .filter_tasks(user_id, filter, page_number)
+            .await
     }
 
     pub async fn create(

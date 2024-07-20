@@ -1,6 +1,9 @@
-use crate::constns::cache::CACHE_VALUES;
+use crate::consts::cache::CACHE_VALUES;
 use crate::domain::user::model::{ActiveModel, Column, Entity as UserEntity, Model as User};
 use crate::domain::user::repository::UserRepository;
+use crate::infrastructure::auth::Auth;
+use crate::interfaces::dtos::user_dto::UserDto;
+use argon2::Argon2;
 use moka::future::Cache;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, Set,
@@ -19,11 +22,18 @@ impl<'b> UserRepo<'b> {
 }
 
 impl<'b> UserRepository for UserRepo<'b> {
-    async fn create_user(&self, user: User) -> Result<User, sea_orm::DbErr> {
+    async fn create_user(&self, user: UserDto) -> Result<User, sea_orm::DbErr> {
+        let hashed_password = Auth {
+            argon: Argon2::default(),
+        }
+        .hash_password(user.password)
+        .ok()
+        .ok_or(DbErr::Custom("Couldn't hash the password".to_string()))?;
+
         let new_user = ActiveModel {
             username: Set(user.username),
             email: Set(user.email),
-            password_hash: Set(user.password_hash),
+            password_hash: Set(hashed_password),
             ..Default::default()
         };
 
@@ -101,4 +111,6 @@ impl<'b> UserRepository for UserRepo<'b> {
             Err(DbErr::Custom("No Such Activation Code.".to_string()))
         }
     }
+
+    
 }

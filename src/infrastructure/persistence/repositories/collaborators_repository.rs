@@ -17,7 +17,6 @@ impl<'b> CollaborationRepo<'b> {
     }
 }
 
-
 impl<'b> CollaborationRepository for CollaborationRepo<'b> {
     #[instrument(level= Level::INFO, name="Collaboration Repository")]
     async fn find_task_collaborators(&self, task_id: i32) -> Result<Vec<Collaboration>, DbErr> {
@@ -26,7 +25,7 @@ impl<'b> CollaborationRepository for CollaborationRepo<'b> {
             .all(self.db)
             .await
     }
-    
+
     #[instrument(level= Level::INFO, name="Collaboration Repository")]
     async fn find_user_collaborations(&self, user_id: i32) -> Result<Vec<Collaboration>, DbErr> {
         CollaborationEntity::find()
@@ -34,10 +33,9 @@ impl<'b> CollaborationRepository for CollaborationRepo<'b> {
             .all(self.db)
             .await
     }
-    
+
     #[instrument(level= Level::INFO, name="Collaboration Repository")]
     async fn add(&self, collaboration: Collaboration) -> Result<Collaboration, DbErr> {
-        
         let collaborator = ActiveModel {
             user_id: Set(collaboration.user_id),
             task_id: Set(collaboration.task_id),
@@ -45,13 +43,16 @@ impl<'b> CollaborationRepository for CollaborationRepo<'b> {
         };
         let collaborator_info = format!("{:?}", collaboration);
         event!(Level::INFO, "Adding Collaborator: {collaborator_info}");
-        
+
         let collabotator_record = CollaborationEntity::insert(collaborator)
             .exec(self.db)
             .await?
             .last_insert_id;
-        event!(Level::INFO, "Added Collaborator with Id: {collabotator_record}");
-        
+        event!(
+            Level::INFO,
+            "Added Collaborator with Id: {collabotator_record}"
+        );
+
         CollaborationEntity::find_by_id(collabotator_record)
             .one(self.db)
             .await?

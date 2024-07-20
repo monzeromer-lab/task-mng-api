@@ -7,4 +7,3 @@ pub struct NotificationDto {
     pub message: String,
     pub read: bool,
 }
-

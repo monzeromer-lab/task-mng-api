@@ -1,25 +1,23 @@
 mod configs;
-mod constns;
+mod consts;
 mod domain;
 mod infrastructure;
 mod interfaces;
+mod utils;
 
-use actix_web::web::Data;
-use actix_web::{web, App, HttpServer, Responder};
-use constns::cache::CACHE_VALUES;
-use infrastructure::cache::create_cache_store;
-use infrastructure::database::init_db;
-use interfaces::routes::task_mng_routes;
+use actix_web::{web, web::Data, App, HttpServer, Responder};
+use consts::cache::CACHE_VALUES;
+use dotenv::dotenv;
+use infrastructure::{cache::create_cache_store, database::init_db};
+use interfaces::controllers::{
+    task_contoller::{create_task, find_task},
+    users_controller::login_user,
+};
 use moka::future::Cache;
 use sea_orm::DatabaseConnection;
 use std::sync::Arc;
-use tracing::level_filters::LevelFilter;
-use tracing::{event, instrument, Level};
-use tracing_subscriber::filter::EnvFilter;
-use tracing_subscriber::fmt;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
-use dotenv::dotenv;
+use tracing::{event, instrument, level_filters::LevelFilter, Level};
+use tracing_subscriber::{filter::EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[instrument(level= Level::INFO, name= "HealthCheck")]
 async fn index() -> impl Responder {
@@ -35,7 +33,7 @@ pub struct AppState {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-    
+
     EnvFilter::builder()
         .with_default_directive(LevelFilter::ERROR.into())
         .from_env_lossy();
@@ -54,7 +52,15 @@ async fn main() -> std::io::Result<()> {
                 connection: database_connection.clone(),
                 app_cache: app_cache.clone(),
             }))
-            .service(task_mng_routes())
+            .service(
+                web::scope("/app")
+                    .service(web::scope("/user").route("/login", web::post().to(login_user)))
+                    .service(
+                        web::scope("/task")
+                            .route("/create", web::post().to(create_task))
+                            .route("/find", web::get().to(find_task)),
+                    ),
+            )
             .service(web::scope("/").route("/health", web::get().to(index)))
     })
     .bind(("127.0.0.1", 8000))?

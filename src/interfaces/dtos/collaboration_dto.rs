@@ -1,6 +1,5 @@
 use serde::Deserialize;
 
-
 #[derive(Debug, Deserialize)]
 pub struct CollaborationDto {
     pub user_id: Option<i32>,

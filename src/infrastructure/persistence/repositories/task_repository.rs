@@ -72,10 +72,7 @@ impl<'b> TaskRepository for TaskRepo<'b> {
             ..Default::default()
         };
 
-        let record_id = TaskEntity::insert(task)
-            .exec(self.db)
-            .await?
-            .last_insert_id;
+        let record_id = TaskEntity::insert(task).exec(self.db).await?.last_insert_id;
         self.find_task(record_id).await
     }
 
