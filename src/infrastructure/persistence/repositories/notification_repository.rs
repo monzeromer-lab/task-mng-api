@@ -7,17 +7,17 @@ use sea_orm::{
     QueryFilter, Set,
 };
 
-pub struct NotificationRepo {
-    db: DatabaseConnection,
+pub struct NotificationRepo<'b> {
+    pub db: &'b DatabaseConnection,
 }
 
-impl NotificationRepo {
-    pub fn _new(db: DatabaseConnection) -> Self {
+impl<'b> NotificationRepo<'b> {
+    pub fn _new(db: &'b DatabaseConnection) -> Self {
         Self { db }
     }
 }
 
-impl NotificationRepository for NotificationRepo {
+impl<'b> NotificationRepository for NotificationRepo<'b> {
     async fn find_notifications(
         &self,
         user_id: i32,
@@ -25,7 +25,7 @@ impl NotificationRepository for NotificationRepo {
     ) -> Result<Vec<crate::domain::notification::model::Model>, sea_orm::DbErr> {
         NotificationEntity::find()
             .filter(Column::UserId.eq(user_id))
-            .paginate(&self.db, page_number as u64)
+            .paginate(self.db, page_number as u64)
             .fetch()
             .await
     }
@@ -40,7 +40,7 @@ impl NotificationRepository for NotificationRepo {
             message: Set(notification.message),
             ..Default::default()
         };
-        new_notification.insert(&self.db).await
+        new_notification.insert(self.db).await
     }
 
     async fn mark_notification_as_read(
@@ -48,7 +48,7 @@ impl NotificationRepository for NotificationRepo {
         notification_id: i32,
     ) -> Result<Notification, sea_orm::DbErr> {
         let notification_record = NotificationEntity::find_by_id(notification_id)
-            .one(&self.db)
+            .one(self.db)
             .await?;
         let mut notification: ActiveModel = notification_record
             .ok_or(DbErr::RecordNotFound("No Such a Notification".to_string()))?
@@ -56,6 +56,6 @@ impl NotificationRepository for NotificationRepo {
 
         notification.read = Set(true);
 
-        notification.update(&self.db).await
+        notification.update(self.db).await
     }
 }

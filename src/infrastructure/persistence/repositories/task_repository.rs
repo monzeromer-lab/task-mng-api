@@ -59,7 +59,6 @@ impl<'b> TaskRepository for TaskRepo<'b> {
         }
 
         query = query.filter(TaskColumn::Status.eq(filter.status));
-
         query.paginate(self.db, page_number as u64).fetch().await
     }
 

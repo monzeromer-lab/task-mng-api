@@ -1,3 +1,4 @@
+mod configs;
 mod constns;
 mod domain;
 mod infrastructure;
@@ -8,6 +9,7 @@ use actix_web::{web, App, HttpServer, Responder};
 use constns::cache::CACHE_VALUES;
 use infrastructure::cache::create_cache_store;
 use infrastructure::database::init_db;
+use interfaces::routes::task_mng_routes;
 use moka::future::Cache;
 use sea_orm::DatabaseConnection;
 use std::sync::Arc;
@@ -17,6 +19,7 @@ use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::fmt;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+use dotenv::dotenv;
 
 #[instrument(level= Level::INFO, name= "HealthCheck")]
 async fn index() -> impl Responder {
@@ -31,6 +34,8 @@ pub struct AppState {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    dotenv().ok();
+    
     EnvFilter::builder()
         .with_default_directive(LevelFilter::ERROR.into())
         .from_env_lossy();
@@ -49,7 +54,8 @@ async fn main() -> std::io::Result<()> {
                 connection: database_connection.clone(),
                 app_cache: app_cache.clone(),
             }))
-            .service(web::scope("/app").route("/health", web::get().to(index)))
+            .service(task_mng_routes())
+            .service(web::scope("/").route("/health", web::get().to(index)))
     })
     .bind(("127.0.0.1", 8000))?
     .run()
