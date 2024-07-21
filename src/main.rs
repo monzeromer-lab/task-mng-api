@@ -7,11 +7,10 @@ mod utils;
 
 use actix_web::{web, web::Data, App, HttpServer, Responder};
 use consts::cache::CACHE_VALUES;
-use dotenv::dotenv;
 use infrastructure::{cache::create_cache_store, database::init_db};
 use interfaces::controllers::{
-    task_contoller::{create_task, find_task},
-    users_controller::login_user,
+    task_contoller::{create_task, find_task, task_routes},
+    users_controller::{login_user, signup_user, user_routes},
 };
 use moka::future::Cache;
 use sea_orm::DatabaseConnection;
@@ -32,7 +31,6 @@ pub struct AppState {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv().ok();
 
     EnvFilter::builder()
         .with_default_directive(LevelFilter::ERROR.into())
@@ -54,12 +52,8 @@ async fn main() -> std::io::Result<()> {
             }))
             .service(
                 web::scope("/app")
-                    .service(web::scope("/user").route("/login", web::post().to(login_user)))
-                    .service(
-                        web::scope("/task")
-                            .route("/create", web::post().to(create_task))
-                            .route("/find", web::get().to(find_task)),
-                    ),
+                    .service(user_routes())
+                    .service(task_routes()),
             )
             .service(web::scope("/").route("/health", web::get().to(index)))
     })

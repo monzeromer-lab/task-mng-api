@@ -25,4 +25,4 @@ dev *args:
 
 # Run with debug logs
 run *args:
-    env RUST_LOG=info RUST_BACKTRACE=full cargo run {{args}}
+    env RUST_LOG=info SECRET_KEY=23k4n5lj3n4l5nj4oin23on534n5jn345oi34n5k324n5okn342o5jn RUST_BACKTRACE=full cargo run {{args}}

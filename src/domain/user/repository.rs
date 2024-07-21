@@ -11,7 +11,7 @@ pub enum LoginState {
 
 pub trait UserRepository {
     async fn create_user(&self, user: UserDto) -> Result<User, DbErr>;
-    async fn find_by_email(&self, email: String) -> Result<User, DbErr>;
+    async fn find_by_email(&self, email: &String) -> Result<User, DbErr>;
     async fn find_by_username(&self, username: String) -> Result<User, DbErr>;
     async fn update_password(
         &self,

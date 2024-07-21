@@ -19,4 +19,5 @@ pub enum CACHE_VALUES {
     NOTIFICATION_FOR_USER(i32),
     VERIFICATION_CODE(String, i32),
     ACTIVATION_CODE(String, i32),
+    RESET_PASSWORD_CODE(String, String)
 }

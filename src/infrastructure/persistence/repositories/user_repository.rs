@@ -47,7 +47,7 @@ impl<'b> UserRepository for UserRepo<'b> {
             .ok_or(DbErr::RecordNotFound("Couldn't find this user".to_string()))
     }
 
-    async fn find_by_email(&self, email: String) -> Result<User, sea_orm::DbErr> {
+    async fn find_by_email(&self, email: &String) -> Result<User, sea_orm::DbErr> {
         UserEntity::find()
             .filter(Column::Email.eq(email))
             .one(self.db)
@@ -72,9 +72,10 @@ impl<'b> UserRepository for UserRepo<'b> {
         new_password: String,
         verify_code: String,
     ) -> Result<User, sea_orm::DbErr> {
+        let cache_key = format!("VERIFICATION_CODE:{}", verify_code);
         let cache_entry = self
             .cache
-            .get(&"VERIFICATION_CODE:{verify_code}".to_string())
+            .get(&cache_key.to_string())
             .await;
 
         if let Some(CACHE_VALUES::VERIFICATION_CODE(code, user_id)) = cache_entry {
@@ -94,9 +95,10 @@ impl<'b> UserRepository for UserRepo<'b> {
         _user_id: i32,
         verify_code: String,
     ) -> Result<bool, sea_orm::DbErr> {
+        let cache_key = format!("ACTIVATION_CODE:{}", verify_code);
         let cache_entry = self
             .cache
-            .get(&"VERIFICATION_CODE:{verify_code}".to_string())
+            .get(&cache_key.to_string())
             .await;
 
         if let Some(CACHE_VALUES::ACTIVATION_CODE(_code, cached_user_id)) = cache_entry {

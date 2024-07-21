@@ -26,7 +26,7 @@ impl<'a> UserService<'a> {
     }
 
     pub async fn find_user_by_email(&self, email: String) -> Result<User, DbErr> {
-        self.repository.find_by_email(email).await
+        self.repository.find_by_email(&email).await
     }
 
     pub async fn find_user_by_username(&self, username: String) -> Result<User, DbErr> {
@@ -52,8 +52,9 @@ impl<'a> UserService<'a> {
     }
     
     pub async fn login_user(&self, email: String, password: String) -> Result<LoginState, DbErr> {
-        let user = self.repository.find_by_email(email).await.ok().ok_or(DbErr::Custom(
-            "couldn't find the user by email: {email}".to_string(),
+        let user_notfound_error = format!("couldn't find the user by email: {email}");
+        let user = self.repository.find_by_email(&email).await.ok().ok_or(DbErr::Custom(
+            user_notfound_error,
         ))?;
         
         let password_authintec = Auth {
@@ -65,9 +66,10 @@ impl<'a> UserService<'a> {
             user_id: user.id,
         };
 
+        let no_token_created_error = format!("couldn't create the token for user with email: {{email}}");
         let token = Auth {
             argon: Argon2::default(),
-        }.make_token(token_payload).ok().ok_or(DbErr::Custom("couldn't create the token for user with email: {email}".to_string()))?;
+        }.make_token(token_payload).ok().ok_or(DbErr::Custom(no_token_created_error))?;
         
         if password_authintec {
            Ok(LoginState::Token(token)) 

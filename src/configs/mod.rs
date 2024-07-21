@@ -5,6 +5,7 @@ pub struct CONFIGS {
 }
 
 pub fn configs() -> CONFIGS {
+    
     CONFIGS {
         secret_key: env::var("SECRET_KEY").expect("Missing SECRET_KEY enviroment variable"),
     }
